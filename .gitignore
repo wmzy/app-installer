@@ -1,0 +1,104 @@
+# 下载的文件和目录
+downloads/
+*/downloads/
+bin/
+*/bin/
+
+# 编译和构建产物
+*.exe
+*.dll
+*.so
+*.dylib
+*.a
+*.o
+*.obj
+
+# 压缩文件
+*.gz
+*.zip
+*.tar
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tgz
+*.rar
+*.7z
+
+# 日志文件
+*.log
+logs/
+*/logs/
+
+# 临时文件
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# 系统文件
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE 和编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.vim/
+
+# 配置文件（可能包含敏感信息）
+config.yaml
+*.yaml.local
+*.yml.local
+.env
+.env.local
+.env.*.local
+
+# 测试和临时目录
+test-*/
+temp-*/
+tmp-*/
+
+# Node.js（如果有）
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python（如果有）
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+
+# 备份文件
+*.bak
+*.backup
+*.old
+
+# 特定于 mihomo 的文件
+mihomo-*
+clash-*
+*.pid
+
+# 证书和密钥文件
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# 数据库文件
+*.db
+*.sqlite
+*.sqlite3
