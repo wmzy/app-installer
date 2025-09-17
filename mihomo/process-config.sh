@@ -1,5 +1,5 @@
 #!/bin/bash
-# 配置文件环境变量处理脚本
+# 简化的配置文件处理脚本 - 只处理代理提供商配置
 
 set -euo pipefail
 
@@ -23,33 +23,14 @@ print_error() { echo -e "${RED}❌ $1${NC}"; }
 # 创建默认 .env 文件
 create_default_env() {
     cat > "$ENV_FILE" << 'EOF'
-# Mihomo 配置环境变量
+# Mihomo 代理提供商配置
 # 请根据实际情况修改以下配置
 
-# 代理提供商配置
+# 代理提供商名称
 PROXY_PROVIDER_NAME=MyProvider
+
+# 代理订阅链接
 PROXY_PROVIDER_URL=https://example.com/subscription
-
-# 网络配置
-MIXED_PORT=7890
-EXTERNAL_CONTROLLER=127.0.0.1:9090
-
-# TUN 模式配置 (true/false)
-TUN_ENABLE=true
-
-# DNS 配置
-DNS_ENABLE=true
-DNS_IPV6=true
-
-# 允许局域网访问 (true/false)
-ALLOW_LAN=true
-
-# IPv6 支持 (true/false)
-IPV6=true
-
-# 外部 UI 配置
-EXTERNAL_UI=ui
-EXTERNAL_UI_URL=https://github.com/MetaCubeX/metacubexd/archive/refs/heads/gh-pages.zip
 EOF
 }
 
@@ -68,32 +49,13 @@ source "$ENV_FILE"
 set +a
 
 # 验证必需的环境变量
-required_vars=(
-    "PROXY_PROVIDER_NAME"
-    "PROXY_PROVIDER_URL"
-    "MIXED_PORT"
-    "EXTERNAL_CONTROLLER"
-    "TUN_ENABLE"
-    "DNS_ENABLE"
-    "DNS_IPV6"
-    "ALLOW_LAN"
-    "IPV6"
-    "EXTERNAL_UI"
-    "EXTERNAL_UI_URL"
-)
+if [[ -z "${PROXY_PROVIDER_NAME:-}" ]]; then
+    print_error "缺少必需的环境变量: PROXY_PROVIDER_NAME"
+    exit 1
+fi
 
-missing_vars=()
-for var in "${required_vars[@]}"; do
-    if [[ -z "${!var:-}" ]]; then
-        missing_vars+=("$var")
-    fi
-done
-
-if [[ ${#missing_vars[@]} -gt 0 ]]; then
-    print_error "缺少必需的环境变量:"
-    for var in "${missing_vars[@]}"; do
-        echo "  - $var"
-    done
+if [[ -z "${PROXY_PROVIDER_URL:-}" ]]; then
+    print_error "缺少必需的环境变量: PROXY_PROVIDER_URL"
     exit 1
 fi
 
@@ -104,36 +66,28 @@ if [[ ! -f "$CONFIG_TEMPLATE" ]]; then
     exit 1
 fi
 
-# 使用 envsubst 替换环境变量
-if command -v envsubst >/dev/null 2>&1; then
-    envsubst < "$CONFIG_TEMPLATE" > "$CONFIG_OUTPUT"
-else
-    # 如果没有 envsubst，使用 sed 进行简单替换
-    print_warning "未找到 envsubst，使用 sed 进行替换..."
-    cp "$CONFIG_TEMPLATE" "$CONFIG_OUTPUT"
-    
-    for var in "${required_vars[@]}"; do
-        sed -i.bak "s/\${$var}/${!var}/g" "$CONFIG_OUTPUT"
-    done
-    rm -f "$CONFIG_OUTPUT.bak"
-fi
+# 使用 sed 进行简单的字符串替换
+print_info "替换代理提供商配置..."
+sed "s/\${PROXY_PROVIDER_NAME}/$PROXY_PROVIDER_NAME/g; s|\${PROXY_PROVIDER_URL}|$PROXY_PROVIDER_URL|g" "$CONFIG_TEMPLATE" > "$CONFIG_OUTPUT"
 
 print_success "配置文件处理完成: $CONFIG_OUTPUT"
 
 # 验证生成的配置文件
 if [[ -f "$CONFIG_OUTPUT" ]]; then
-    # 检查是否还有未替换的变量
-    if grep -q '\${' "$CONFIG_OUTPUT"; then
-        print_warning "配置文件中仍有未替换的变量:"
-        grep '\${' "$CONFIG_OUTPUT" || true
+    # 检查是否还有未替换的代理提供商变量
+    if grep -q '\${PROXY_PROVIDER_' "$CONFIG_OUTPUT"; then
+        print_warning "配置文件中仍有未替换的代理提供商变量:"
+        grep '\${PROXY_PROVIDER_' "$CONFIG_OUTPUT" || true
     else
-        print_success "所有环境变量已成功替换"
+        print_success "代理提供商配置已成功替换"
     fi
     
     print_info "配置文件信息:"
     echo "  - 模板文件: $CONFIG_TEMPLATE"
     echo "  - 环境文件: $ENV_FILE"
     echo "  - 输出文件: $CONFIG_OUTPUT"
+    echo "  - 提供商名称: $PROXY_PROVIDER_NAME"
+    echo "  - 订阅链接: $PROXY_PROVIDER_URL"
     echo ""
     print_info "使用方法:"
     echo "  mihomo -f $CONFIG_OUTPUT"

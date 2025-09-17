@@ -19,14 +19,14 @@ proxies:
     type: direct
     udp: true
 
-mixed-port: ${MIXED_PORT}
-ipv6: ${IPV6}
-allow-lan: ${ALLOW_LAN}
+mixed-port: 7890
+ipv6: true
+allow-lan: true
 unified-delay: false
 tcp-concurrent: true
-external-controller: ${EXTERNAL_CONTROLLER}
-external-ui: ${EXTERNAL_UI}
-external-ui-url: "${EXTERNAL_UI_URL}"
+external-controller: 127.0.0.1:9090
+external-ui: ui
+external-ui-url: "https://github.com/MetaCubeX/metacubexd/archive/refs/heads/gh-pages.zip"
 
 geodata-mode: true
 geox-url:
@@ -57,7 +57,7 @@ sniffer:
     - "+.push.apple.com"
 
 tun:
-  enable: ${TUN_ENABLE}
+  enable: true
   stack: mixed
   dns-hijack:
     - "any:53"
@@ -67,8 +67,8 @@ tun:
   auto-detect-interface: true
 
 dns:
-  enable: ${DNS_ENABLE}
-  ipv6: ${DNS_IPV6}
+  enable: true
+  ipv6: true
   enhanced-mode: fake-ip
   fake-ip-filter:
     - "*"

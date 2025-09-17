@@ -2,7 +2,7 @@
 
 ## 📋 概述
 
-本项目使用环境变量来管理 Mihomo 配置，支持灵活的配置管理和敏感信息保护。
+本项目使用简单的环境变量替换来管理 Mihomo 代理提供商配置，保护敏感的订阅链接信息。
 
 ## 🔧 配置流程
 
@@ -17,7 +17,7 @@ cd mihomo
 
 ### 2. 编辑环境变量
 
-编辑生成的 `.env` 文件，填入实际配置值：
+编辑生成的 `.env` 文件，填入实际的代理提供商信息：
 
 ```bash
 nano .env
@@ -33,6 +33,8 @@ nano .env
 
 ## 📝 环境变量说明
 
+只需要配置两个代理提供商相关的环境变量：
+
 ### 代理提供商配置
 ```bash
 # 代理提供商名称
@@ -42,44 +44,11 @@ PROXY_PROVIDER_NAME=MyProvider
 PROXY_PROVIDER_URL=https://example.com/subscription
 ```
 
-### 网络配置
-```bash
-# 混合端口（HTTP + SOCKS5）
-MIXED_PORT=7890
+**说明：**
+- `PROXY_PROVIDER_NAME` - 代理提供商的名称，会替换配置文件中的 `${PROXY_PROVIDER_NAME}`
+- `PROXY_PROVIDER_URL` - 代理订阅链接，会替换配置文件中的 `${PROXY_PROVIDER_URL}`
 
-# 外部控制器地址
-EXTERNAL_CONTROLLER=127.0.0.1:9090
-
-# 允许局域网访问
-ALLOW_LAN=true
-
-# IPv6 支持
-IPV6=true
-```
-
-### TUN 模式配置
-```bash
-# 启用 TUN 模式
-TUN_ENABLE=true
-```
-
-### DNS 配置
-```bash
-# 启用 DNS
-DNS_ENABLE=true
-
-# DNS IPv6 支持
-DNS_IPV6=true
-```
-
-### 外部 UI 配置
-```bash
-# 外部 UI 目录名
-EXTERNAL_UI=ui
-
-# 外部 UI 下载链接
-EXTERNAL_UI_URL=https://github.com/MetaCubeX/metacubexd/archive/refs/heads/gh-pages.zip
-```
+其他网络配置（端口、DNS、TUN 等）都使用固定的默认值，无需通过环境变量配置。
 
 ## 📁 文件说明
 
@@ -113,44 +82,33 @@ mihomo -f config-processed.yaml
 
 ## 🛠️ 自定义配置
 
-### 添加新的环境变量
+### 修改网络配置
 
-1. 在 `config.yaml` 中添加占位符：
-   ```yaml
-   new-option: ${NEW_OPTION}
-   ```
+如需修改端口、DNS 等网络配置，直接编辑 `config.yaml` 模板文件中的固定值：
 
-2. 在 `process-config.sh` 中添加到 `required_vars` 数组：
-   ```bash
-   required_vars=(
-       # ... 现有变量
-       "NEW_OPTION"
-   )
-   ```
+```yaml
+mixed-port: 7890        # 修改混合端口
+external-controller: 127.0.0.1:9090  # 修改控制器地址
+allow-lan: true         # 修改局域网访问
+```
 
-3. 在 `.env` 文件中添加实际值：
-   ```bash
-   NEW_OPTION=actual_value
-   ```
+### 修改默认代理提供商
 
-### 修改默认值
-
-编辑 `process-config.sh` 中的 `create_default_env()` 函数来修改默认值。
+编辑 `process-config.sh` 中的 `create_default_env()` 函数来修改默认的代理提供商信息。
 
 ## 🔍 故障排除
 
 ### 配置文件生成失败
-- 检查 `.env` 文件是否包含所有必需的变量
-- 确保环境变量值没有特殊字符冲突
+- 检查 `.env` 文件是否包含 `PROXY_PROVIDER_NAME` 和 `PROXY_PROVIDER_URL`
+- 确保代理订阅链接没有特殊字符冲突
 - 查看脚本输出的错误信息
 
 ### 环境变量未替换
-- 确保变量名在 `config.yaml` 中使用 `${VARIABLE_NAME}` 格式
-- 检查变量名是否在 `required_vars` 数组中
-- 验证 `.env` 文件中的变量名拼写
+- 确保 `.env` 文件中的变量名拼写正确
+- 检查代理订阅链接是否包含特殊字符（如 `|`），需要适当转义
 
 ### 权限问题
-- 确保 `process-config.sh` 有执行权限
+- 确保 `process-config.sh` 有执行权限：`chmod +x process-config.sh`
 - 检查生成的配置文件是否可读
 
 ## 📚 相关文档
