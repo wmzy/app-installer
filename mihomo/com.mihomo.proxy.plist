@@ -7,8 +7,9 @@
     
     <key>ProgramArguments</key>
     <array>
-        <string>/bin/bash</string>
-        <string>/Users/mihomo/start-mihomo.sh</string>
+        <string>/Users/mihomo/bin/mihomo</string>
+        <string>-d</string>
+        <string>/Users/mihomo/.config/mihomo</string>
     </array>
     
     <key>RunAtLoad</key>
@@ -24,10 +25,10 @@
     <string>/Users/mihomo</string>
     
     <key>StandardOutPath</key>
-    <string>/Users/mihomo/logs/stdout.log</string>
+    <string>/Users/mihomo/logs/mihomo.log</string>
     
     <key>StandardErrorPath</key>
-    <string>/Users/mihomo/logs/stderr.log</string>
+    <string>/Users/mihomo/logs/mihomo.log</string>
     
     <key>UserName</key>
     <string>mihomo</string>
@@ -39,21 +40,9 @@
     <key>SoftResourceLimits</key>
     <dict>
         <key>NumberOfFiles</key>
-        <integer>1024</integer>
+        <integer>4096</integer>
         <key>NumberOfProcesses</key>
-        <integer>10</integer>
-    </dict>
-    
-    <!-- 网络访问权限 -->
-    <key>Sockets</key>
-    <dict>
-        <key>Listeners</key>
-        <dict>
-            <key>SockServiceName</key>
-            <string>7890</string>
-            <key>SockType</key>
-            <string>stream</string>
-        </dict>
+        <integer>50</integer>
     </dict>
 </dict>
 </plist>
