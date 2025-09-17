@@ -53,7 +53,8 @@ Thumbs.db
 .vim/
 
 # 配置文件（可能包含敏感信息）
-config.yaml
+config-processed.yaml
+*/config-processed.yaml
 *.yaml.local
 *.yml.local
 .env

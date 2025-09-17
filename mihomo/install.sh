@@ -80,13 +80,30 @@ fi
 
 # 4. 处理配置文件
 print_info "处理配置文件..."
-if [[ -f "$SCRIPT_DIR/config.yaml" ]]; then
+
+# 检查是否有配置处理脚本
+if [[ -f "$SCRIPT_DIR/process-config.sh" ]]; then
+    print_info "运行配置处理脚本..."
+    cd "$SCRIPT_DIR"
+    ./process-config.sh
+    
+    # 检查是否生成了处理后的配置文件
+    if [[ -f "$SCRIPT_DIR/config-processed.yaml" ]]; then
+        sudo cp "$SCRIPT_DIR/config-processed.yaml" "$MIHOMO_HOME/.config/mihomo/config.yaml"
+        sudo chown "$MIHOMO_USER:staff" "$MIHOMO_HOME/.config/mihomo/config.yaml"
+        sudo chmod 600 "$MIHOMO_HOME/.config/mihomo/config.yaml"
+        print_success "环境变量配置文件安装完成"
+    elif [[ -f "$SCRIPT_DIR/.env" ]]; then
+        print_warning "配置处理脚本运行完成，但未生成配置文件"
+        print_info "请检查 .env 文件并重新运行配置处理脚本"
+    else
+        print_info "已创建默认 .env 文件，请编辑后重新运行安装脚本"
+        exit 0
+    fi
+elif [[ -f "$SCRIPT_DIR/config.yaml" ]]; then
+    # 如果有模板配置文件但没有处理脚本，直接复制
+    print_warning "找到配置模板但没有处理脚本，直接复制配置文件"
     sudo cp "$SCRIPT_DIR/config.yaml" "$MIHOMO_HOME/.config/mihomo/"
-    sudo chown "$MIHOMO_USER:staff" "$MIHOMO_HOME/.config/mihomo/config.yaml"
-    sudo chmod 600 "$MIHOMO_HOME/.config/mihomo/config.yaml"
-    print_success "配置文件复制完成"
-elif [[ -f "$SCRIPT_DIR/docs/config.yaml" ]]; then
-    sudo cp "$SCRIPT_DIR/docs/config.yaml" "$MIHOMO_HOME/.config/mihomo/"
     sudo chown "$MIHOMO_USER:staff" "$MIHOMO_HOME/.config/mihomo/config.yaml"
     sudo chmod 600 "$MIHOMO_HOME/.config/mihomo/config.yaml"
     print_success "配置文件复制完成"
@@ -97,8 +114,7 @@ else
 # Mihomo 基础配置
 # 请根据需要修改此配置文件
 
-port: 7890
-socks-port: 7891
+mixed-port: 7890
 allow-lan: false
 mode: rule
 log-level: info
@@ -106,18 +122,23 @@ external-controller: 127.0.0.1:9090
 
 dns:
   enable: true
-  listen: 0.0.0.0:53
   enhanced-mode: fake-ip
   nameserver:
     - 114.114.114.114
     - 8.8.8.8
 
-proxies: []
+proxies:
+  - name: "直连"
+    type: direct
 
-proxy-groups: []
+proxy-groups:
+  - name: "默认"
+    type: select
+    proxies:
+      - "直连"
 
 rules:
-  - MATCH,DIRECT
+  - MATCH,默认
 EOF
     print_success "基础配置文件创建完成"
 fi
