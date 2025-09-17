@@ -105,6 +105,23 @@ cd mihomo/
 
 # 重新加载配置
 ./service-control.sh reload
+
+# 系统代理管理
+./service-control.sh proxy-on|proxy-off|proxy-status
+```
+
+### 系统代理设置
+```bash
+# 通过服务管理脚本
+./service-control.sh proxy-on     # 启用系统代理
+./service-control.sh proxy-off    # 禁用系统代理
+./service-control.sh proxy-status # 查看代理状态
+
+# 独立代理管理脚本
+sudo ./proxy-settings.sh enable   # 启用系统代理
+sudo ./proxy-settings.sh disable  # 禁用系统代理
+sudo ./proxy-settings.sh status   # 查看代理状态
+sudo ./proxy-settings.sh list     # 查看所有网络服务状态
 ```
 
 ### 卸载

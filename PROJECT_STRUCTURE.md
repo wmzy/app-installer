@@ -31,7 +31,8 @@ app-installer/
 ### Mihomo 专用脚本
 - **`mihomo/download.sh`** - 调用通用下载器下载 Mihomo
 - **`mihomo/install.sh`** - 完整安装脚本，包含自动下载功能
-- **`mihomo/service-control.sh`** - 服务管理脚本（启动/停止/重启/状态/日志）
+- **`mihomo/service-control.sh`** - 服务管理脚本（启动/停止/重启/状态/日志/代理）
+- **`mihomo/proxy-settings.sh`** - 系统代理设置脚本（类似 ClashX 功能）
 - **`mihomo/uninstall.sh`** - 完整卸载脚本，清理所有组件
 - **`mihomo/com.mihomo.proxy.plist`** - macOS 系统服务配置
 

@@ -169,26 +169,74 @@ follow_logs() {
     fi
 }
 
+# 启用系统代理
+enable_system_proxy() {
+    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    local proxy_script="$script_dir/proxy-settings.sh"
+    
+    if [[ -f "$proxy_script" ]]; then
+        print_info "启用系统代理..."
+        sudo "$proxy_script" enable
+    else
+        print_error "代理设置脚本不存在: $proxy_script"
+    fi
+}
+
+# 禁用系统代理
+disable_system_proxy() {
+    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    local proxy_script="$script_dir/proxy-settings.sh"
+    
+    if [[ -f "$proxy_script" ]]; then
+        print_info "禁用系统代理..."
+        sudo "$proxy_script" disable
+    else
+        print_error "代理设置脚本不存在: $proxy_script"
+    fi
+}
+
+# 显示代理状态
+show_proxy_status() {
+    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    local proxy_script="$script_dir/proxy-settings.sh"
+    
+    if [[ -f "$proxy_script" ]]; then
+        "$proxy_script" status
+    else
+        print_error "代理设置脚本不存在: $proxy_script"
+    fi
+}
+
 # 显示帮助
 show_help() {
     echo "Mihomo 服务管理脚本"
     echo ""
-    echo "用法: $0 {start|stop|restart|status|reload|logs|follow|help}"
+    echo "用法: $0 {start|stop|restart|status|reload|logs|follow|proxy-on|proxy-off|proxy-status|help}"
     echo ""
-    echo "命令:"
-    echo "  start    - 启动服务"
-    echo "  stop     - 停止服务"
-    echo "  restart  - 重启服务"
-    echo "  status   - 查看服务状态"
-    echo "  reload   - 重新加载配置 (无需重启)"
-    echo "  logs     - 查看日志 (默认最近20行)"
-    echo "  logs N   - 查看日志 (最近N行)"
-    echo "  follow   - 实时查看日志"
-    echo "  help     - 显示此帮助信息"
+    echo "服务管理:"
+    echo "  start       - 启动服务"
+    echo "  stop        - 停止服务"
+    echo "  restart     - 重启服务"
+    echo "  status      - 查看服务状态"
+    echo "  reload      - 重新加载配置 (无需重启)"
+    echo ""
+    echo "日志管理:"
+    echo "  logs        - 查看日志 (默认最近20行)"
+    echo "  logs N      - 查看日志 (最近N行)"
+    echo "  follow      - 实时查看日志"
+    echo ""
+    echo "系统代理:"
+    echo "  proxy-on    - 启用系统代理"
+    echo "  proxy-off   - 禁用系统代理"
+    echo "  proxy-status- 查看系统代理状态"
+    echo ""
+    echo "其他:"
+    echo "  help        - 显示此帮助信息"
     echo ""
     echo "示例:"
-    echo "  $0 status              # 查看状态"
+    echo "  $0 status              # 查看服务状态"
     echo "  $0 restart             # 重启服务"
+    echo "  $0 proxy-on            # 启动服务并启用系统代理"
     echo "  $0 logs 50             # 查看最近50行日志"
     echo "  $0 follow              # 实时查看日志"
 }
@@ -215,6 +263,15 @@ case "${1:-}" in
         ;;
     follow)
         follow_logs
+        ;;
+    proxy-on)
+        enable_system_proxy
+        ;;
+    proxy-off)
+        disable_system_proxy
+        ;;
+    proxy-status)
+        show_proxy_status
         ;;
     help|--help|-h)
         show_help
