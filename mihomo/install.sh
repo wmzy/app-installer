@@ -79,12 +79,31 @@ print_success "LaunchAgent 配置复制完成"
 print_info "设置安全权限..."
 sudo chown -R "$MIHOMO_USER:staff" "$MIHOMO_HOME"
 sudo chmod 700 "$MIHOMO_HOME"
+
+# 为当前用户添加配置和日志的读写权限
+CURRENT_USER=$(whoami)
+print_info "为当前用户 $CURRENT_USER 添加配置和日志访问权限..."
+sudo chmod 755 "$MIHOMO_HOME"  # 允许进入目录
+sudo chmod 755 "$MIHOMO_HOME/.config" "$MIHOMO_HOME/.config/mihomo"  # 允许进入配置目录
+sudo chmod 644 "$MIHOMO_HOME/.config/mihomo/config.yaml"  # 允许读写配置文件
+sudo chmod 755 "$MIHOMO_HOME/logs"  # 允许进入日志目录
+sudo setfacl -m "u:$CURRENT_USER:rw" "$MIHOMO_HOME/.config/mihomo/config.yaml" 2>/dev/null || \
+sudo chmod 666 "$MIHOMO_HOME/.config/mihomo/config.yaml"  # 备用方案：给所有用户读写权限
+sudo setfacl -m "u:$CURRENT_USER:r" "$MIHOMO_HOME/logs/mihomo.log" 2>/dev/null || \
+sudo chmod 644 "$MIHOMO_HOME/logs/mihomo.log"  # 备用方案：给所有用户读权限
 print_success "权限设置完成"
 
 print_success "Mihomo 独立账户环境部署完成！"
 echo ""
 print_info "后续步骤:"
-echo "1. 编辑配置文件: sudo nano $MIHOMO_HOME/.config/mihomo/config.yaml"
-echo "2. 启动服务: sudo launchctl load $MIHOMO_HOME/Library/LaunchAgents/com.mihomo.proxy.plist"
-echo "3. 检查状态: ps aux | grep mihomo"
-echo "4. 查看日志: tail -f $MIHOMO_HOME/logs/mihomo.log"
+echo "1. 编辑配置文件: nano $MIHOMO_HOME/.config/mihomo/config.yaml"
+echo "2. 启动服务: $SCRIPT_DIR/service-control.sh start"
+echo "3. 查看状态: $SCRIPT_DIR/service-control.sh status"
+echo "4. 查看日志: $SCRIPT_DIR/service-control.sh logs"
+echo ""
+print_info "服务管理命令:"
+echo "• 启动服务: $SCRIPT_DIR/service-control.sh start"
+echo "• 停止服务: $SCRIPT_DIR/service-control.sh stop"
+echo "• 重启服务: $SCRIPT_DIR/service-control.sh restart"
+echo "• 重载配置: $SCRIPT_DIR/service-control.sh reload"
+echo "• 实时日志: $SCRIPT_DIR/service-control.sh follow"

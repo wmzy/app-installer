@@ -85,8 +85,37 @@ your-app/
 └── config/          # 配置文件
 ```
 
+## Mihomo 专用功能
+
+### 安装
+```bash
+cd mihomo/
+./install.sh
+```
+
+### 服务管理
+```bash
+# 启动/停止/重启服务
+./service-control.sh start|stop|restart
+
+# 查看状态和日志
+./service-control.sh status
+./service-control.sh logs
+./service-control.sh follow
+
+# 重新加载配置
+./service-control.sh reload
+```
+
+### 卸载
+```bash
+# 完全卸载 Mihomo（包括用户账户和所有文件）
+./uninstall.sh
+```
+
 ## 系统要求
 
 - Bash 4.0+
 - curl 或 wget
 - 标准 Unix 工具 (grep, sed, awk)
+- macOS (对于 Mihomo LaunchAgent 功能)
