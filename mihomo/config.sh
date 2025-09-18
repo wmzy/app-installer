@@ -3,8 +3,9 @@
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_TEMPLATE="$SCRIPT_DIR/config.yaml"
-CONFIG_OUTPUT="$SCRIPT_DIR/config-processed.yaml"
 ENV_FILE="$SCRIPT_DIR/.env"
+MIHOMO_HOME="$HOME/.mihomo"
+CONFIG_OUTPUT="$MIHOMO_HOME/config/config.yaml"
 
 # 如果没有 .env 文件，创建默认的
 if [[ ! -f "$ENV_FILE" ]]; then
@@ -21,3 +22,9 @@ source "$ENV_FILE"
 sed "s/\${PROXY_PROVIDER_NAME}/$PROXY_PROVIDER_NAME/g; s|\${PROXY_PROVIDER_URL}|$PROXY_PROVIDER_URL|g" "$CONFIG_TEMPLATE" > "$CONFIG_OUTPUT"
 
 echo "配置文件已生成: $CONFIG_OUTPUT"
+
+chmod 600 "$CONFIG_OUTPUT"
+
+curl 'http://127.0.0.1:9090/configs?force=true' -X 'PUT' --data-raw '{"path":"","payload":""}' 2>/dev/null
+
+echo "配置文件安装完成"

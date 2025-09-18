@@ -43,11 +43,7 @@ print_success "二进制文件复制完成"
 # 3. 处理配置文件
 print_info "处理配置文件..."
 cd "$SCRIPT_DIR"
-./process-config.sh
-
-cp "$SCRIPT_DIR/config-processed.yaml" "$MIHOMO_HOME/config/config.yaml"
-chmod 600 "$MIHOMO_HOME/config/config.yaml"
-print_success "配置文件安装完成"
+./config.sh
 
 # 4. 创建 LaunchAgent plist 文件
 print_info "创建 LaunchAgent 配置..."
