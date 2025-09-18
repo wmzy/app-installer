@@ -10,13 +10,13 @@ print_warning() { echo -e "\033[33m[WARNING]\033[0m $1"; }
 print_error() { echo -e "\033[31m[ERROR]\033[0m $1"; }
 
 # 配置
-MIHOMO_USER="mihomo"
-MIHOMO_HOME="/Users/$MIHOMO_USER"
-PLIST_PATH="$MIHOMO_HOME/Library/LaunchAgents/com.mihomo.proxy.plist"
+CURRENT_USER=$(whoami)
+MIHOMO_HOME="$HOME/.mihomo"
+PLIST_PATH="$HOME/Library/LaunchAgents/mihomo.plist"
 
 # 检查服务状态
 check_service_status() {
-    if launchctl list | grep -q "com.mihomo.proxy"; then
+    if launchctl list | grep -q "mihomo"; then
         return 0  # 服务已加载
     else
         return 1  # 服务未加载
@@ -57,6 +57,11 @@ status() {
     else
         print_warning "日志文件不存在"
     fi
+    
+    echo ""
+    print_info "环境状态:"
+    echo "• 工作目录: $MIHOMO_HOME"
+    echo "• 运行用户: $CURRENT_USER"
 }
 
 # 启动服务
@@ -65,7 +70,7 @@ start() {
     
     if check_service_status; then
         print_warning "服务已经加载，尝试启动..."
-        launchctl start com.mihomo.proxy
+        launchctl start mihomo
     else
         print_info "加载并启动服务..."
         launchctl load "$PLIST_PATH"
@@ -82,6 +87,7 @@ start() {
             print_info "最近的错误日志:"
             tail -10 "$MIHOMO_HOME/logs/mihomo.log"
         fi
+        print_info "请检查配置文件和网络连接"
     fi
 }
 

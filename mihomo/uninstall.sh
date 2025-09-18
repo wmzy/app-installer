@@ -10,9 +10,9 @@ print_warning() { echo -e "\033[33m[WARNING]\033[0m $1"; }
 print_error() { echo -e "\033[31m[ERROR]\033[0m $1"; }
 
 # 配置
-MIHOMO_USER="mihomo"
-MIHOMO_HOME="/Users/$MIHOMO_USER"
-PLIST_PATH="$MIHOMO_HOME/Library/LaunchAgents/com.mihomo.proxy.plist"
+CURRENT_USER=$(whoami)
+MIHOMO_HOME="$HOME/.mihomo"
+PLIST_PATH="$HOME/Library/LaunchAgents/mihomo.plist"
 
 # 获取脚本目录
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -21,9 +21,8 @@ print_warning "⚠️  即将完全卸载 Mihomo 代理服务"
 echo ""
 print_info "将执行以下操作："
 echo "1. 停止并卸载 LaunchAgent 服务"
-echo "2. 删除 mihomo 用户账户"
-echo "3. 清理所有相关文件和目录"
-echo "4. 清理本地下载的文件"
+echo "2. 删除 ~/.mihomo 目录和所有文件"
+echo "3. 清理 LaunchAgent 配置文件"
 echo ""
 
 # 确认操作
@@ -40,7 +39,7 @@ print_info "开始卸载 Mihomo..."
 print_info "停止 Mihomo 服务..."
 
 # 检查服务是否存在并停止
-if launchctl list | grep -q "com.mihomo.proxy" 2>/dev/null; then
+if launchctl list | grep -q "mihomo" 2>/dev/null; then
     print_info "发现运行中的服务，正在停止..."
     launchctl unload "$PLIST_PATH" 2>/dev/null || true
     print_success "服务已停止"
@@ -62,83 +61,30 @@ if pgrep -f "mihomo" > /dev/null 2>&1; then
     print_success "进程已清理"
 fi
 
-# 2. 删除用户账户
-print_info "删除 mihomo 用户账户..."
-
-if dscl . -read /Users/$MIHOMO_USER > /dev/null 2>&1; then
-    # 获取用户 UID
-    USER_UID=$(dscl . -read /Users/$MIHOMO_USER UniqueID | awk '{print $2}')
-    
-    print_info "删除用户 $MIHOMO_USER (UID: $USER_UID)..."
-    
-    # 删除用户记录
-    sudo dscl . -delete /Users/$MIHOMO_USER
-    
-    # 删除用户组（如果存在独立组）
-    if dscl . -read /Groups/$MIHOMO_USER > /dev/null 2>&1; then
-        sudo dscl . -delete /Groups/$MIHOMO_USER
-    fi
-    
-    print_success "用户账户已删除"
-else
-    print_info "用户 $MIHOMO_USER 不存在，跳过"
-fi
-
-# 3. 删除用户目录和所有文件
-print_info "删除用户目录和所有相关文件..."
+# 2. 删除 Mihomo 目录和所有文件
+print_info "删除 Mihomo 目录和所有相关文件..."
 
 if [[ -d "$MIHOMO_HOME" ]]; then
     print_info "删除目录: $MIHOMO_HOME"
-    sudo rm -rf "$MIHOMO_HOME"
-    print_success "用户目录已删除"
+    rm -rf "$MIHOMO_HOME"
+    print_success "Mihomo 目录已删除"
 else
-    print_info "用户目录不存在，跳过"
+    print_info "Mihomo 目录不存在，跳过"
 fi
 
-# 4. 清理本地项目文件
-print_info "清理本地项目文件..."
+# 3. 删除 LaunchAgent plist 文件
+print_info "删除 LaunchAgent 配置文件..."
 
-# 清理下载的二进制文件
-if [[ -d "$SCRIPT_DIR/bin" ]]; then
-    print_info "删除下载的二进制文件..."
-    rm -rf "$SCRIPT_DIR/bin"
-    print_success "二进制文件已删除"
+if [[ -f "$PLIST_PATH" ]]; then
+    print_info "删除文件: $PLIST_PATH"
+    rm -f "$PLIST_PATH"
+    print_success "LaunchAgent 配置文件已删除"
+else
+    print_info "LaunchAgent 配置文件不存在，跳过"
 fi
 
-# 清理下载目录
-if [[ -d "$SCRIPT_DIR/downloads" ]]; then
-    print_info "删除下载缓存..."
-    rm -rf "$SCRIPT_DIR/downloads"
-    print_success "下载缓存已删除"
-fi
-
-# 清理处理后的配置文件
-if [[ -f "$SCRIPT_DIR/config-processed.yaml" ]]; then
-    print_info "删除处理后的配置文件..."
-    rm -f "$SCRIPT_DIR/config-processed.yaml"
-    print_success "配置文件已删除"
-fi
-
-# 清理环境变量文件（可选）
-if [[ -f "$SCRIPT_DIR/.env" ]]; then
-    read -p "是否删除 .env 配置文件？[y/N]: " -r
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        rm -f "$SCRIPT_DIR/.env"
-        print_success ".env 文件已删除"
-    else
-        print_info "保留 .env 文件"
-    fi
-fi
-
-# 5. 验证清理结果
+# 4. 验证清理结果
 print_info "验证卸载结果..."
-
-# 检查用户是否还存在
-if dscl . -read /Users/$MIHOMO_USER > /dev/null 2>&1; then
-    print_warning "用户 $MIHOMO_USER 仍然存在"
-else
-    print_success "✅ 用户已完全删除"
-fi
 
 # 检查进程是否还在运行
 if pgrep -f "mihomo" > /dev/null 2>&1; then
@@ -150,13 +96,20 @@ fi
 
 # 检查目录是否还存在
 if [[ -d "$MIHOMO_HOME" ]]; then
-    print_warning "用户目录仍然存在: $MIHOMO_HOME"
+    print_warning "Mihomo 目录仍然存在: $MIHOMO_HOME"
 else
-    print_success "✅ 用户目录已完全删除"
+    print_success "✅ Mihomo 目录已完全删除"
+fi
+
+# 检查 plist 文件是否还存在
+if [[ -f "$PLIST_PATH" ]]; then
+    print_warning "LaunchAgent 配置文件仍然存在: $PLIST_PATH"
+else
+    print_success "✅ LaunchAgent 配置文件已删除"
 fi
 
 # 检查服务是否还在
-if launchctl list | grep -q "com.mihomo.proxy" 2>/dev/null; then
+if launchctl list | grep -q "mihomo" 2>/dev/null; then
     print_warning "LaunchAgent 服务仍在列表中"
 else
     print_success "✅ LaunchAgent 服务已清理"
@@ -166,9 +119,9 @@ echo ""
 print_success "🎉 Mihomo 卸载完成！"
 echo ""
 print_info "已清理的内容："
-echo "• Mihomo 用户账户和用户组"
-echo "• 用户主目录 (/Users/mihomo)"
+echo "• Mihomo 目录 ($MIHOMO_HOME)"
 echo "• LaunchAgent 服务配置"
+echo "• LaunchAgent plist 文件"
 echo "• 所有相关进程"
 echo "• 本地下载的二进制文件"
 echo "• 临时和缓存文件"

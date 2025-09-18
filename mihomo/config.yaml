@@ -57,7 +57,7 @@ sniffer:
     - "+.push.apple.com"
 
 tun:
-  enable: true
+  enable: false
   stack: mixed
   dns-hijack:
     - "any:53"
@@ -87,6 +87,11 @@ proxy-groups:
     type: select
     proxies:
       [自动选择, 直连, 香港, 台湾, 日本, 新加坡, 美国, 其它地区, 全部节点]
+
+  - name: AI
+    type: select
+    proxies:
+      [自动选择ai, 台湾, 日本, 新加坡, 美国]
 
   - name: Google
     type: select
@@ -191,8 +196,18 @@ proxy-groups:
     exclude-type: direct
     tolerance: 10
 
+  - name: 自动选择ai
+    type: url-test
+    url: "https://claude.ai"
+    interval: 30
+    include-all: true
+    exclude-type: direct
+    filter: "(?i)^(?!.*(?:🇭🇰|港|hk|hongkong|官网)).*"
+    tolerance: 10
+
 rules:
   - GEOIP,lan,直连,no-resolve
+  - RULE-SET,ai_domain,AI
   - GEOSITE,github,Github
   - GEOSITE,twitter,Twitter
   - GEOSITE,youtube,YouTube
@@ -211,3 +226,20 @@ rules:
   - GEOIP,twitter,Twitter
   - GEOIP,CN,国内
   - MATCH,其他
+
+rule-providers:
+  ai_domain: 
+    type: inline
+    behavior: classical
+    # https://gist.github.com/sarices/017da597ae6b28063bbdd52693d78385
+    # https://github.com/blackmatrix7/ios_rule_script/tree/master/rule/Clash/Claude
+    payload:
+      - DOMAIN,cdn.usefathom.com
+      - DOMAIN-SUFFIX,anthropic.com
+      - DOMAIN-SUFFIX,claude.ai
+      - DOMAIN-SUFFIX,claude.com
+      - DOMAIN-SUFFIX,forefront.ai
+      - DOMAIN-SUFFIX,claudeusercontent.com
+      - DOMAIN-SUFFIX,generativelanguage.googleapis.com
+      - DOMAIN-SUFFIX,bard.google.com
+      - DOMAIN-SUFFIX,cursor.sh

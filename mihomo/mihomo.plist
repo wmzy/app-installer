@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.mihomo.proxy</string>
+    <string>mihomo</string>
     
     <key>ProgramArguments</key>
     <array>
-        <string>/Users/mihomo/bin/mihomo</string>
+        <string>MIHOMO_HOME_PLACEHOLDER/bin/mihomo</string>
         <string>-d</string>
-        <string>/Users/mihomo/.config/mihomo</string>
+        <string>MIHOMO_HOME_PLACEHOLDER/config</string>
     </array>
     
     <key>RunAtLoad</key>
@@ -22,19 +22,13 @@
     </dict>
     
     <key>WorkingDirectory</key>
-    <string>/Users/mihomo</string>
+    <string>MIHOMO_HOME_PLACEHOLDER</string>
     
     <key>StandardOutPath</key>
-    <string>/Users/mihomo/logs/mihomo.log</string>
+    <string>MIHOMO_HOME_PLACEHOLDER/logs/mihomo.log</string>
     
     <key>StandardErrorPath</key>
-    <string>/Users/mihomo/logs/mihomo.log</string>
-    
-    <key>UserName</key>
-    <string>mihomo</string>
-    
-    <key>GroupName</key>
-    <string>staff</string>
+    <string>MIHOMO_HOME_PLACEHOLDER/logs/mihomo.log</string>
     
     <!-- 限制资源使用 -->
     <key>SoftResourceLimits</key>
