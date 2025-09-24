@@ -111,7 +111,7 @@ proxy-groups:
   - name: 哔哩哔哩
     type: select
     proxies:
-      [默认, 香港, 台湾, 日本, 新加坡, 美国, 其它地区, 全部节点, 自动选择, 直连]
+      [直连, 默认, 香港, 台湾, 日本, 新加坡, 美国, 其它地区, 全部节点, 自动选择]
 
   - name: 巴哈姆特
     type: select
@@ -198,8 +198,9 @@ proxy-groups:
 
   - name: 自动选择ai
     type: url-test
-    url: "https://claude.ai"
-    interval: 30
+    # url: "https://claude.ai"
+    url: "https://api2.cursor.sh"
+    interval: 10
     include-all: true
     exclude-type: direct
     filter: "(?i)^(?!.*(?:🇭🇰|港|hk|hongkong|官网)).*"
