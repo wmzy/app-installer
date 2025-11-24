@@ -60,6 +60,7 @@ config-processed.yaml
 .env
 .env.local
 .env.*.local
+config.providers.yaml
 
 # 测试和临时目录
 test-*/
