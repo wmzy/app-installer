@@ -71,7 +71,7 @@ proxy-groups:
   - name: 默认
     type: select
     proxies:
-      [自动选择, 直连, 香港, 台湾, 日本, 新加坡, 美国, 其它地区, 全部节点]
+      [自动选择fallback, 自动选择, 直连, 香港, 台湾, 日本, 新加坡, 美国, 其它地区, 全部节点]
 
   - name: AI
     type: select
@@ -179,6 +179,28 @@ proxy-groups:
     type: url-test
     include-all: true
     exclude-type: direct
+    tolerance: 10
+
+  - name: 自动选择fallback
+    type: fallback
+    proxies:
+      - 自动选择[0]
+      - 自动选择[1]
+    url: 'https://www.gstatic.com/generate_204'
+    interval: 300
+
+  - name: 自动选择[0]
+    type: url-test
+    include-all: true
+    exclude-type: direct
+    filter: "^\\[0].*"
+    tolerance: 10
+
+  - name: 自动选择[1]
+    type: url-test
+    include-all: true
+    exclude-type: direct
+    filter: "^\\[1].*"
     tolerance: 10
 
   - name: 自动选择ai

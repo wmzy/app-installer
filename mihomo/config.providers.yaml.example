@@ -12,7 +12,7 @@ proxy-providers:
         interval: 300,
       }
     override:
-      additional-prefix: "[provider1]"
+      additional-prefix: "[0][provider1]" # 0 表示在 【自动选择fallback】 中优先使用
 
   provider2:
     url: "https://example.com/provider2"
@@ -25,4 +25,4 @@ proxy-providers:
         interval: 300,
       }
     override:
-      additional-prefix: "[provider2]"
+      additional-prefix: "[1][provider2]"
