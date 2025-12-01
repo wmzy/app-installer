@@ -76,7 +76,7 @@ proxy-groups:
   - name: AI
     type: select
     proxies:
-      [自动选择ai, 台湾, 日本, 新加坡, 美国]
+      [自动选择ai, 台湾, 日本, 新加坡, 美国, 其它地区]
 
   - name: Google
     type: select
