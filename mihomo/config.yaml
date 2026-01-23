@@ -254,3 +254,4 @@ rule-providers:
       - DOMAIN-SUFFIX,openai.com
       - DOMAIN-SUFFIX,chatgpt.com
       - DOMAIN-SUFFIX,ai.google.dev
+      - DOMAIN-SUFFIX,aistudio.google.com
