@@ -258,3 +258,4 @@ rule-providers:
       - DOMAIN-SUFFIX,ai.google.dev
       - DOMAIN-SUFFIX,aistudio.google.com
       - DOMAIN-SUFFIX,tokenharbor.ai
+      - DOMAIN-SUFFIX,muse.ai
