@@ -123,6 +123,7 @@ proxy-groups:
     url: "https://api.github.com"
     interval: 10
     include-all: true
+    exclude-type: direct
     tolerance: 10
 
   - name: 国内
