@@ -13,6 +13,7 @@
 | `config.providers.yaml` | 订阅源定义（敏感，已 gitignore；首次从 `.example` 复制） |
 | `config.yaml` | 主配置模板：代理组、规则、DNS 等 |
 | `config.sh` | 拼接上面两者 → `~/.mihomo/config/config.yaml`，并调 API 热重载 |
+| `config-linux.sh` | Linux/dnf 版：输出 `/etc/mihomo/config.yaml`（非 root 自动 sudo），热重载失败兜底 `systemctl restart`；ppg hosts 数据源为 `/etc/mihomo/ppg-hosts.txt` |
 | `install.sh` / `uninstall.sh` | 部署 / 卸载（bin、配置、LaunchAgent、日志轮转、升级脚本） |
 | `upgrade.sh` | 二进制升级脚本（见下文） |
 | `mihomo.sh` | 服务管理脚本，安装到 `/usr/local/bin/mihomo` |
@@ -64,6 +65,16 @@ ppg 机场入口 IP 是 DNS 轮询的（动态负载均衡），由 LaunchAgent 
 ```
 
 任一域名解析失败时保留旧数据，不影响现有连接。
+
+**Linux (dnf)**：ppg hosts 数据源路径不同——`config-linux.sh` 读 `/etc/mihomo/ppg-hosts.txt`。Linux 版刷新脚本为 `ppg-dns-update-linux.sh`（逻辑同 mac 版），由 systemd timer 每 30 分钟以 root 运行，安装/卸载脚本：
+
+```bash
+cd mihomo
+sudo ./ppg-dns-install-linux.sh     # 安装 timer 并立即刷新一次
+sudo ./ppg-dns-uninstall-linux.sh   # 卸载 timer 并清理 hosts
+```
+
+`PUT /configs` 同步等待订阅初始化，订阅 URL 变更时整个重载可能耗时 1 分钟左右，脚本 `--max-time 120` 覆盖该场景。`external-controller`/`secret` 变更不随热重载生效，需 `sudo systemctl restart mihomo`。
 
 ## ⬆️ 升级 mihomo
 

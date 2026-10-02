@@ -1,0 +1,9 @@
+[Unit]
+Description=Refresh ppg airport entry IPs (one-shot)
+After=network-online.target mihomo.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+# REPO_DIR_PLACEHOLDER 安装时替换为仓库根目录 (mihomo/ 所在目录)
+ExecStart=REPO_DIR_PLACEHOLDER/mihomo/ppg-dns-update-linux.sh
