@@ -26,6 +26,11 @@ geox-url:
 find-process-mode: strict
 global-client-fingerprint: chrome
 
+# ppg 机场节点域名(*.kunlun05dns.com)只能由其私有 DNS 解析, 公共 DNS 无记录;
+# 作为 proxy-provider 加载时订阅内的 dns 段被丢弃, 因此 hosts 由 config.sh
+# 动态注入 (数据源: ~/.mihomo/config/ppg-hosts.txt, 由 ppg-dns-update.sh 每 30 分钟刷新)
+# 手动刷新: ~/.mihomo/bin/ppg-dns-update.sh
+
 profile:
   store-selected: true
   store-fake-ip: true

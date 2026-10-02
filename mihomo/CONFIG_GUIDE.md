@@ -55,6 +55,16 @@ mihomo proxy-on|proxy-off|proxy-status   # 系统代理
 mihomo upgrade       # 升级二进制到最新 release
 ```
 
+## 🔄 ppg 入口刷新
+
+ppg 机场入口 IP 是 DNS 轮询的（动态负载均衡），由 LaunchAgent `mihomo.ppg-dns` 每 30 分钟自动刷新：脚本 `ppg-dns-update.sh` 用私有 DoH 解析 5 个入口域名 → 收集 IP 池 → 写入 `~/.mihomo/config/ppg-hosts.txt` → 调 `config.sh` 注入到运行时配置并热重载。**动态 IP 只存在于运行时数据文件，模板 `config.yaml` 保持静态（不进 git）**。手动执行：
+
+```bash
+~/.mihomo/bin/ppg-dns-update.sh
+```
+
+任一域名解析失败时保留旧数据，不影响现有连接。
+
 ## ⬆️ 升级 mihomo
 
 ```bash
@@ -71,10 +81,12 @@ LaunchAgent `mihomo.clean-log` 每天 04:30 检查 `~/.mihomo/logs/mihomo.log`�
 ## 📝 配置要点备忘
 
 - **Github 组探测用 `github.com/robots.txt`**，不要用 `api.github.com`：后者消耗出口 IP 的未认证 API 配额（60 次/时），节点健康检查会把自己打到 403
+- **ppg 机场的特殊处理**：ppg 节点 server 域名（`*.kunlun05dns.com`，共 5 个：hk/jp/us/sg/other）只能由机场私有 DoH（`20.247.42.211:36290` 等）解析，公共 DNS 无记录。mihomo 用 proxy-provider 加载订阅时会丢弃订阅内的 `dns` 段，因此 `config.sh` 生成配置时从 `~/.mihomo/config/ppg-hosts.txt` 动态注入 `hosts:`（IP 池由 `ppg-dns-update.sh` 每 30 分钟刷新，模板保持静态）。机场用 DNS 轮询负载均衡（每次查询返回不同 IP），所以注入的是 IP 池而非单 IP。**漏写任何一个域名，对应地区节点全部不可用**
 - url-test 组 `tolerance: 150`（过小会导致节点频繁切换）、`interval` 不宜低于 60s
 - Geo 数据库已开启自动更新：`geo-auto-update: true`，每 24h
 - Apple 域名走"国内"组（国内有 CDN，直连更快）；临时代理在 UI 切组即可
 - fake-ip DNS 段当前实际未启用（tun 关闭、无 dns-hijack）；开启 tun 时需重新审查
+- 全局 `proxy-server-nameserver` 不能指向 ppg 私有 DNS：它对公共域名返回空答案且 mihomo 不 fallback，会摧毁其它订阅的域名解析
 
 ## 🔒 安全说明
 

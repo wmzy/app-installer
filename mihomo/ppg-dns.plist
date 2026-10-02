@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>mihomo.ppg-dns</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>MIHOMO_HOME_PLACEHOLDER/bin/ppg-dns-update.sh</string>
+    </array>
+
+    <!-- 每 30 分钟刷新 ppg 入口 IP (动态负载均衡) -->
+    <key>StartInterval</key>
+    <integer>1800</integer>
+</dict>
+</plist>

@@ -66,6 +66,20 @@ print_success "日志轮转配置创建完成"
 cp "$SCRIPT_DIR/upgrade.sh" "$MIHOMO_HOME/bin/"
 chmod 755 "$MIHOMO_HOME/bin/upgrade.sh"
 
+# 4.3 安装 ppg 入口刷新脚本 + LaunchAgent (每 30 分钟更新 hosts)
+# ppg 节点域名只能由机场私有 DNS 解析, 用 hosts 指定 IP 池绕过
+sed "s|APP_INSTALLER_PLACEHOLDER|$SCRIPT_DIR|g" \
+    "$SCRIPT_DIR/ppg-dns-update.sh" > "$MIHOMO_HOME/bin/ppg-dns-update.sh"
+chmod 755 "$MIHOMO_HOME/bin/ppg-dns-update.sh"
+sed "s|MIHOMO_HOME_PLACEHOLDER|$MIHOMO_HOME|g" \
+    "$SCRIPT_DIR/ppg-dns.plist" > "$HOME/Library/LaunchAgents/mihomo.ppg-dns.plist"
+chmod 644 "$HOME/Library/LaunchAgents/mihomo.ppg-dns.plist"
+launchctl bootstrap "gui/$(id -u)" "$HOME/Library/LaunchAgents/mihomo.ppg-dns.plist" 2>/dev/null || \
+    launchctl kickstart -k "gui/$(id -u)/mihomo.ppg-dns" 2>/dev/null || true
+# 首次刷新 (生成 ppg-hosts.txt 并注入 hosts)
+bash "$MIHOMO_HOME/bin/ppg-dns-update.sh" || print_warning "ppg 入口首次刷新失败, 将由定时任务重试"
+print_success "ppg 入口刷新配置安装完成"
+
 # 5. 设置目录权限
 print_info "设置目录权限..."
 chmod 700 "$MIHOMO_HOME"           # 根目录仅当前用户访问

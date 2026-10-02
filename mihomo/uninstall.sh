@@ -44,6 +44,7 @@ if launchctl list | grep -q "mihomo" 2>/dev/null; then
     print_info "发现运行中的服务，正在停止..."
     launchctl unload "$PLIST_PATH" 2>/dev/null || true
     launchctl unload "$CLEANLOG_PLIST_PATH" 2>/dev/null || true
+    launchctl unload "$HOME/Library/LaunchAgents/mihomo.ppg-dns.plist" 2>/dev/null || true
     print_success "服务已停止"
 else
     print_info "服务未运行"
@@ -92,6 +93,16 @@ if [[ -f "$CLEANLOG_PLIST_PATH" ]]; then
 else
     print_info "日志轮转配置不存在，跳过"
 fi
+
+if [[ -f "$HOME/Library/LaunchAgents/mihomo.ppg-dns.plist" ]]; then
+    print_info "删除文件: $HOME/Library/LaunchAgents/mihomo.ppg-dns.plist"
+    rm -f "$HOME/Library/LaunchAgents/mihomo.ppg-dns.plist"
+    print_success "ppg 入口刷新配置已删除"
+else
+    print_info "ppg 入口刷新配置不存在，跳过"
+fi
+
+rm -f "$MIHOMO_HOME/config/ppg-hosts.txt"
 
 # 4. 验证清理结果
 print_info "验证卸载结果..."
