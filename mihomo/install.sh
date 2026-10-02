@@ -53,6 +53,19 @@ sed "s|MIHOMO_HOME_PLACEHOLDER|$MIHOMO_HOME|g" \
 chmod 644 "$HOME/Library/LaunchAgents/mihomo.plist"
 print_success "LaunchAgent 配置创建完成"
 
+# 4.1 安装日志轮转脚本和 LaunchAgent (每天 04:30 检查, 超 100MB 归档清空, 保留 3 份)
+print_info "创建日志轮转配置..."
+cp "$SCRIPT_DIR/clean-log.sh" "$MIHOMO_HOME/bin/"
+chmod 755 "$MIHOMO_HOME/bin/clean-log.sh"
+sed "s|MIHOMO_HOME_PLACEHOLDER|$MIHOMO_HOME|g" \
+    "$SCRIPT_DIR/clean-log.plist" > "$HOME/Library/LaunchAgents/mihomo.clean-log.plist"
+chmod 644 "$HOME/Library/LaunchAgents/mihomo.clean-log.plist"
+print_success "日志轮转配置创建完成"
+
+# 4.2 安装升级脚本 (mihomo upgrade 子命令调用; 也可手动 ~/.mihomo/bin/upgrade.sh)
+cp "$SCRIPT_DIR/upgrade.sh" "$MIHOMO_HOME/bin/"
+chmod 755 "$MIHOMO_HOME/bin/upgrade.sh"
+
 # 5. 设置目录权限
 print_info "设置目录权限..."
 chmod 700 "$MIHOMO_HOME"           # 根目录仅当前用户访问

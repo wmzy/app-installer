@@ -217,7 +217,7 @@ show_proxy_status() {
 show_help() {
     echo "Mihomo 服务管理脚本"
     echo ""
-    echo "用法: $0 {start|stop|restart|status|reload|logs|follow|proxy-on|proxy-off|proxy-status|help}"
+    echo "用法: $0 {start|stop|restart|status|reload|logs|follow|proxy-on|proxy-off|proxy-status|upgrade|help}"
     echo ""
     echo "服务管理:"
     echo "  start       - 启动服务"
@@ -237,6 +237,7 @@ show_help() {
     echo "  proxy-status- 查看系统代理状态"
     echo ""
     echo "其他:"
+    echo "  upgrade     - 升级 mihomo 到最新版本 (下载/替换/重启/校验/回滚)"
     echo "  help        - 显示此帮助信息"
     echo ""
     echo "示例:"
@@ -278,6 +279,13 @@ case "${1:-}" in
         ;;
     proxy-status)
         show_proxy_status
+        ;;
+    upgrade)
+        if [[ -f "$MIHOMO_HOME/bin/upgrade.sh" ]]; then
+            bash "$MIHOMO_HOME/bin/upgrade.sh" "${2:-}"
+        else
+            print_error "升级脚本不存在: $MIHOMO_HOME/bin/upgrade.sh"
+        fi
         ;;
     help|--help|-h)
         show_help

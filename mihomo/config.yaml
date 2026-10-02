@@ -7,13 +7,16 @@ proxies:
 mixed-port: 7890
 ipv6: true
 allow-lan: true
-unified-delay: false
+unified-delay: true
 tcp-concurrent: true
 external-controller: 127.0.0.1:9090
 external-ui: ui
 external-ui-url: "https://github.com/MetaCubeX/metacubexd/archive/refs/heads/gh-pages.zip"
 
 geodata-mode: true
+# GeoIP/GeoSite 数据库自动更新(此前 11 个月没更新, 新增国内域名会误走代理)
+geo-auto-update: true
+geo-update-interval: 24
 geox-url:
   geoip: "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip-lite.dat"
   geosite: "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geosite.dat"
@@ -120,11 +123,17 @@ proxy-groups:
 
   - name: Github
     type: url-test
-    url: "https://api.github.com"
-    interval: 10
+    # 用 robots.txt 而不是 api.github.com: 后者消耗出口 IP 的未认证 API 配额(60次/时),
+    # 节点会被自己的健康检查打到 403 限频, 真实 API 请求(gh/git)跟着全部失败
+    url: "https://github.com/robots.txt"
+    # lazy: false 常驻探测, 避免 Github 组空闲后用过期延迟数据选中已死节点
+    # max-failed-times 3: 3 次拨号失败立即触发健康检查切换(默认 5, 且要求失败落在 5s 窗口内)
+    interval: 120
+    lazy: false
+    max-failed-times: 3
     include-all: true
     exclude-type: direct
-    tolerance: 10
+    tolerance: 150
 
   - name: 国内
     type: select
@@ -142,47 +151,54 @@ proxy-groups:
     include-all: true
     exclude-type: direct
     filter: "(?i)港|hk|hongkong|hong kong"
+    tolerance: 150
 
   - name: 台湾
     type: url-test
     include-all: true
     exclude-type: direct
     filter: "(?i)台|tw|taiwan"
+    tolerance: 150
 
   - name: 日本
     type: url-test
     include-all: true
     exclude-type: direct
     filter: "(?i)日|jp|japan"
+    tolerance: 150
 
   - name: 美国
     type: url-test
     include-all: true
     exclude-type: direct
-    filter: "(?i)美|us|unitedstates|united states"
+    filter: "(?i)美|\\busa?\\b|united ?states|🇺🇸"
+    tolerance: 150
 
   - name: 新加坡
     type: url-test
     include-all: true
     exclude-type: direct
-    filter: "(?i)(新|sg|singapore)"
+    filter: "(?i)新加坡|狮城|\\bsg\\b|singapore|🇸🇬"
+    tolerance: 150
 
   - name: 其它地区
     type: url-test
     include-all: true
     exclude-type: direct
-    filter: "(?i)^(?!.*(?:🇭🇰|🇯🇵|🇺🇸|🇸🇬|🇨🇳|港|hk|hongkong|台|tw|taiwan|日|jp|japan|新|sg|singapore|美|us|unitedstates)).*"
+    filter: "(?i)^(?!.*(?:🇭🇰|🇯🇵|🇺🇸|🇸🇬|🇨🇳|港|hk|hongkong|台|tw|taiwan|日|jp|japan|新加坡|狮城|\\bsg\\b|singapore|美|\\busa?\\b|united ?states)).*"
+    tolerance: 150
 
   - name: 全部节点
     type: url-test
     include-all: true
     exclude-type: direct
+    tolerance: 150
 
   - name: 自动选择
     type: url-test
     include-all: true
     exclude-type: direct
-    tolerance: 10
+    tolerance: 150
 
   - name: 自动选择fallback
     type: fallback
@@ -197,24 +213,24 @@ proxy-groups:
     include-all: true
     exclude-type: direct
     filter: "^\\[0].*"
-    tolerance: 10
+    tolerance: 150
 
   - name: 自动选择[1]
     type: url-test
     include-all: true
     exclude-type: direct
     filter: "^\\[1].*"
-    tolerance: 10
+    tolerance: 150
 
   - name: 自动选择ai
     type: url-test
     # url: "https://claude.ai"
     url: "https://api2.cursor.sh"
-    interval: 10
+    interval: 300
     include-all: true
     exclude-type: direct
     filter: "(?i)^(?!.*(?:🇭🇰|港|hk|hongkong|官网)).*"
-    tolerance: 10
+    tolerance: 150
 
 rules:
   - GEOIP,lan,直连,no-resolve
@@ -228,6 +244,9 @@ rules:
   - GEOSITE,bilibili,哔哩哔哩
   - GEOSITE,bahamut,巴哈姆特
   - GEOSITE,spotify,Spotify
+  # Apple 国内有 CDN/云上贵州, 直连更快且省节点流量(此前 38.5 万条连接走了代理)
+  # 如需代理 Apple News 等服务, 在 metacubexd 里把"国内"组切到代理即可
+  - GEOSITE,apple,国内
   - GEOSITE,CN,国内
   - GEOSITE,geolocation-!cn,其他
 
