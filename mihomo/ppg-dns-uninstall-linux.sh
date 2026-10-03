@@ -11,6 +11,7 @@ fi
 systemctl disable --now ppg-dns-update.timer 2>/dev/null || true
 systemctl stop ppg-dns-update.service 2>/dev/null || true
 rm -f /etc/systemd/system/ppg-dns-update.service /etc/systemd/system/ppg-dns-update.timer
+rm -f /usr/local/sbin/ppg-dns-update
 systemctl daemon-reload
 
 # 删除数据文件并重新生成配置, 移除已注入的 hosts

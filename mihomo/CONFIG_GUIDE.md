@@ -66,7 +66,7 @@ ppg 机场入口 IP 是 DNS 轮询的（动态负载均衡），由 LaunchAgent 
 
 任一域名解析失败时保留旧数据，不影响现有连接。
 
-**Linux (dnf)**：ppg hosts 数据源路径不同——`config-linux.sh` 读 `/etc/mihomo/ppg-hosts.txt`。Linux 版刷新脚本为 `ppg-dns-update-linux.sh`（逻辑同 mac 版），由 systemd timer 每 30 分钟以 root 运行，安装/卸载脚本：
+**Linux (dnf)**：ppg hosts 数据源路径不同——`config-linux.sh` 读 `/etc/mihomo/ppg-hosts.txt`。Linux 版刷新脚本为 `ppg-dns-update-linux.sh`（逻辑同 mac 版），由 systemd timer 每 30 分钟以 root 运行。SELinux 禁止 systemd 直接 exec `/home` 下的脚本（`init_t` 不可 execute `user_home_t`，报 203/EXEC），因此安装器把带绝对路径的副本装到 `/usr/local/sbin/ppg-dns-update` 作为服务入口。安装/卸载脚本：
 
 ```bash
 cd mihomo

@@ -14,10 +14,18 @@
 #
 # 由 systemd timer (ppg-dns-update.timer) 每 30 分钟调用, 也可手动执行。
 # 注意: 写入 /etc/mihomo 需 root, 建议由 systemd 服务以 root 运行。
+# systemd 不能直接 exec /home 下的脚本 (SELinux: init_t 禁止 execute
+# user_home_t, 报 203/EXEC), 安装器把本脚本副本 (占位符已替换) 装到
+# /usr/local/sbin/ppg-dns-update (bin_t) 作为 ExecStart 入口,
+# 服务进程转入 unconfined_service_t 后即可正常访问仓库文件。
 
 set -eu
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# 安装时由 ppg-dns-install-linux.sh 替换为仓库 mihomo 目录;
+# 仓库内手动运行时 (占位符未替换) 回退到脚本所在目录
+MIHOMO_DIR="MIHOMO_DIR_PLACEHOLDER"
+[[ "$MIHOMO_DIR" == *_PLACEHOLDER* ]] && \
+    MIHOMO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PPG_HOSTS_FILE="/etc/mihomo/ppg-hosts.txt"
 
 # ppg 全部 5 个入口域名 (漏一个对应地区就全挂)
@@ -107,6 +115,6 @@ install -m 644 "$POOL_FILE" "$PPG_HOSTS_FILE"
 echo "[$(date '+%H:%M:%S')] 数据文件已更新: $PPG_HOSTS_FILE"
 
 # 重新生成配置并热重载 (注入 hosts)
-bash "$SCRIPT_DIR/config-linux.sh"
+bash "$MIHOMO_DIR/config-linux.sh"
 
 exit 0

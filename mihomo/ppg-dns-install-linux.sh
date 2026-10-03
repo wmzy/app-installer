@@ -1,5 +1,5 @@
 #!/bin/bash
-# 安装 ppg 入口 IP 定时刷新 (systemd timer, 每 30 分钟以 root 运行 ppg-dns-update-linux.sh)
+# 安装 ppg 入口 IP 定时刷新 (systemd timer, 每 30 分钟以 root 运行刷新脚本)
 # 需 root; 非 root 自动 sudo 重执行。
 
 set -eu
@@ -9,15 +9,18 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_DIR="$(dirname "$SCRIPT_DIR")"
 
 for f in ppg-dns-update-linux.sh ppg-dns-update.service ppg-dns-update.timer; do
     [[ -f "$SCRIPT_DIR/$f" ]] || { echo "错误: 缺少 $SCRIPT_DIR/$f" >&2; exit 1; }
 done
 
 install -m 644 "$SCRIPT_DIR/ppg-dns-update.service" "$SCRIPT_DIR/ppg-dns-update.timer" /etc/systemd/system/
-# unit 里的 ExecStart 占位符替换为仓库实际路径
-sed -i "s|REPO_DIR_PLACEHOLDER|$REPO_DIR|" /etc/systemd/system/ppg-dns-update.service
+
+# systemd 无法 exec /home 下的脚本 (SELinux: init_t 禁止 execute user_home_t,
+# 报 203/EXEC)。把刷新脚本副本装到 /usr/local/sbin (bin_t) 作为 ExecStart 入口,
+# 占位符替换为仓库 mihomo 目录, 服务进程在 unconfined_service_t 域运行。
+install -D -m 755 <(sed "s|MIHOMO_DIR_PLACEHOLDER|$SCRIPT_DIR|g" \
+    "$SCRIPT_DIR/ppg-dns-update-linux.sh") /usr/local/sbin/ppg-dns-update
 
 systemctl daemon-reload
 systemctl enable --now ppg-dns-update.timer
